@@ -1,42 +1,60 @@
 <template>
-  <div class="d-flex flex-column gap-3 pa-12">
+  <div class="d-flex flex-column gap-3 pa-12 align-center">
+    <v-card width="100%" max-width="500px">
+      <v-form @submit.prevent.stop="submit" >
+        <v-card-text>
+          <v-card-title>Nouvelle Tâche</v-card-title>
+          <v-text-field clearable label='Titre' v-model="newTask.name"/>
+          <v-textarea auto-grow rows="1" max-rows="5" clearable label='Description' v-model="newTask.description"/>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn type="submit" variant="tonal">Sauvegarder</v-btn>
+        </v-card-actions>
+      </v-form>
+    </v-card>
     <v-card v-for="task of tasks" width="100%" max-width="500px">
       <v-card-title class="d-flex justify-space-between">
         {{ task.name }}
-        <v-checkbox v-model="task.checked" />
+        <div class="d-flex align-center">
+          <v-btn icon="mdi-pencil-outline" size="small" @click=""/>
+          <v-btn icon="mdi-delete-outline" size="small" @click="deleteTask(task)"/>
+          <v-checkbox v-model="task.checked" />
+        </div>
       </v-card-title>
-      <v-card-text>{{ task.desc }}</v-card-text>
-      
+      <v-card-text>{{ task.description }}</v-card-text>
     </v-card>
   </div>
 </template>
 
 <script>
+import Task from '@/classes/Task';
+
   export default {
+
     data(){
       return{
-        tasks: [
-          {
-            id:0,
-            name: 'task 1',
-            desc: ' Test',
-            checked: false
-          },
-          {
-            id:1,
-            name: 'task 2',
-            desc: ' Test',
-            checked: false
-          },
-          {
-            id:2,
-            name: 'task 3',
-            desc: ' Test',
-            checked: false
-          }
-        ]
+        tasks:[],
+        newTask: new Task()
+      }
+    },
+    created(){
+      this.refreshData()
+    },
+    methods:{
+      async submit(){
+        await this.newTask.save()
+        this.newTask = new Task()
+        this.refreshData()
+      },
+      async refreshData(){
+        this.tasks = await Task.getAll()
+      },
+      async deleteTask(task){
+        await task.delete()
+        this.refreshData()
       }
     }
+        
   }
 </script>
 
